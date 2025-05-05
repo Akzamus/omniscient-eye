@@ -20,7 +20,7 @@ mongo_client = MongoClient(
 )
 
 telegram_client = TelegramClient(
-    session=config.TELEGRAM_USER_USERNAME,
+    session='omniscient-eye-app',
     api_id=config.TELEGRAM_API_ID,
     api_hash=config.TELEGRAM_API_HASH,
 )
