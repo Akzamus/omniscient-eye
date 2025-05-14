@@ -6,8 +6,9 @@ from pymongo.synchronous.database import Database
 
 from telegram.model.analysis_result import UserGeneralAnalysisResult, UserAnalysisResult, ChatsAnalysisResult, \
     ChatAnalysisResult
+from telegram.model.user_analysis_entity import TelegramUserAnalysisEntity
 from telegram.repo.chat_repository import TelegramChatRepository
-from telegram.repo.pipelines import analyze_chats, analyze_each_chat
+from telegram.repo.pipelines import analyze_chats, analyze_each_chat, group_user_analysis_by_chat
 
 
 class TelegramChatAnalyzer:
@@ -121,6 +122,21 @@ class TelegramChatAnalyzer:
             )
             for document in documents
         ]
+
+    def get_user_analysis_group_by_chat_title(self, chat_ids: list[int], participant_types: list[str]) -> dict[str, list[TelegramUserAnalysisEntity]]:
+        all_users_analysis_collection = self._database['all']
+        pipline = group_user_analysis_by_chat.pipeline(
+            chat_ids=chat_ids,
+            participant_types=participant_types
+        )
+        result = list(all_users_analysis_collection.aggregate(pipline))
+        chat_title_to_user_analysis: dict[str, list[TelegramUserAnalysisEntity]] = {}
+        for document in result:
+            chat_title_to_user_analysis[document['chat_name']] = [
+                TelegramUserAnalysisEntity.from_document(user_analysis_document)
+                for user_analysis_document in document['user_analysis']
+            ]
+        return chat_title_to_user_analysis
 
     def has_analysis_for_user(self, user_id: int) -> bool:
         all_users_analysis_collection = self._database['all']

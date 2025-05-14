@@ -1,4 +1,8 @@
 import logging
+from io import BytesIO
+
+from openpyxl.workbook import Workbook
+
 import container
 
 from aiogram import Router, types
@@ -6,9 +10,12 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 
 from telegram.model.analysis_result import ViewType
+from telegram.model.user_analysis_entity import TelegramUserAnalysisEntity
 from telegram.utils import keyboard_builder
 from telegram.utils.callback_helpers import handle_checkbox_interaction
 from telegram.utils.text import Texts
+from infra import excel_report_generator
+
 
 router = Router()
 logger = logging.getLogger(__file__)
@@ -98,6 +105,34 @@ async def handle_details(callback: types.CallbackQuery, state: FSMContext):
         formatted_text = f'\n{Texts.Bot.Message.SEPARATOR}\n\n'.join(
             r.to_text(ViewType.USERS_BRANCH) for r in results
         )
+
+        workbook = Workbook()
+        workbook.remove(workbook.active)
+
+        chat_title_to_user_analysis = container.telegram_chat_analyzer.get_user_analysis_group_by_chat_title(
+            chat_ids=chat_ids,
+            participant_types=participant_types
+        )
+
+        for chat_title, user_analysis in chat_title_to_user_analysis.items():
+            worksheet = workbook.create_sheet(chat_title)
+            content: list[list[str]] = [TelegramUserAnalysisEntity.get_excel_headers()]
+
+            for user_analys in user_analysis:
+                content.append(user_analys.to_excel_row())
+
+            excel_report_generator.fill_excel_sheet(worksheet, content)
+
+        file_stream = BytesIO()
+        workbook.save(file_stream)
+        file_stream.seek(0)
+
         await callback.message.edit_text(formatted_text)
+        await callback.message.answer_document(
+            document=types.BufferedInputFile(
+                file=file_stream.read(),
+                filename=excel_report_generator.generate_unique_filename('report')
+            )
+        )
         await state.set_state(UsersStates.showing_chats_info_detailed)
         await state.clear()

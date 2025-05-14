@@ -2,14 +2,7 @@ from enum import Enum
 from typing import Optional, Any
 
 from pydantic import BaseModel
-
-NUM_TO_NAME = {
-    1: 'no_join',
-    2: 'risk_join',
-    3: 'maybe_join',
-    4: 'join',
-    5: 'must_join'
-}
+from telegram.utils import text
 
 
 class ViewType(Enum):
@@ -39,7 +32,7 @@ class ChatsAnalysisResult(BaseModel):
             f'📊 <b>Types:</b>',
             *[f"  - {participant_type}: {count}" for participant_type, count in self.participant_type_counts.items()],
             f'📝 <b>Recommendations:</b>',
-            *[f"  - {NUM_TO_NAME.get(int(recommendation), recommendation)}: {count}" for recommendation, count in self.recommendation_counts.items()],
+            *[f"  - {text.RECOMMENDATION_NUMBER_TO_NAME.get(int(recommendation), recommendation)}: {count}" for recommendation, count in self.recommendation_counts.items()],
         ]
         return '\n'.join(lines)
 
@@ -60,7 +53,7 @@ class ChatAnalysisResult(BaseModel):
             f'📊 <b>Types:</b>',
             *[f"  - {participant_type}: {count}" for participant_type, count in self.participant_type_counts.items()],
             f'📝 <b>Recommendations:</b>',
-            *[f"  - {NUM_TO_NAME.get(int(recommendation), recommendation)}: {count}" for recommendation, count in self.recommendation_counts.items()],
+            *[f"  - {text.RECOMMENDATION_NUMBER_TO_NAME.get(int(recommendation), recommendation)}: {count}" for recommendation, count in self.recommendation_counts.items()],
         ]
         return '\n'.join(lines)
 
@@ -80,7 +73,7 @@ class UserGeneralAnalysisResult(BaseModel):
             f'👤 <b>Type:</b>',
             *[f"  - {participant_type} - {percent}%" for participant_type, percent in self.participant_type_percentages.items()],
             f'🔥 <b>Average impact:</b> {self.average_impact}',
-            f'📝 <b>Average recommendation:</b> {NUM_TO_NAME.get(self.average_recommendation, self.average_recommendation)}',
+            f'📝 <b>Average recommendation:</b> {text.RECOMMENDATION_NUMBER_TO_NAME.get(self.average_recommendation, self.average_recommendation)}',
             f'💬 <b>Explanation:</b>',
             *[f"  - {message_type}: {count}" for message_type, count in self.explanation.items() if count != 0],
         ]
@@ -99,7 +92,7 @@ class UserAnalysisResult(BaseModel):
             f'📍 <b>{self.chat_title}</b>',
             f'👤 <b>Type:</b> {self.participant_type}',
             f'🔥 <b>Impact:</b> {self.impact}',
-            f'📝 <b>Recommendation:</b> {NUM_TO_NAME.get(self.recommendation, self.recommendation)}',
+            f'📝 <b>Recommendation:</b> {text.RECOMMENDATION_NUMBER_TO_NAME.get(self.recommendation, self.recommendation)}',
             f'💬 <b>Explanation:</b>',
             *[f"  - {message_type}: {count}" for message_type, count in self.explanation.items() if count != 0],
         ]

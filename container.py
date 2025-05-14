@@ -7,6 +7,7 @@ from telethon import TelegramClient
 import config
 from telegram.repo.chat_repository import TelegramChatRepository
 from telegram.repo.telegram_chat_analyzer import TelegramChatAnalyzer
+from telegram.repo.user_repository import TelegramUserRepository
 
 log = logging.getLogger(__file__)
 
@@ -28,6 +29,10 @@ telegram_client = TelegramClient(
 chat_repository = TelegramChatRepository(
     collection=mongo_client['omniscient-eye']['telegram_chats'],
     cache=ttl_cache
+)
+
+user_repository = TelegramUserRepository(
+    collection=mongo_client['omniscient-eye']['telegram_users']
 )
 
 telegram_chat_analyzer = TelegramChatAnalyzer(

@@ -9,6 +9,7 @@ class Texts:
 
         class Message:
             START = '👋 Welcome! Please choose an option:'
+            ACCESS_ERROR = 'You are not an admin!'
             HOME_PAGE = 'Back to main menu:'
             SELECTING_CHATS = 'Select chats:'
             CHAT_SELECTION_EMPTY_WARNING = '❗️Please select at least one chat.'
@@ -19,3 +20,11 @@ class Texts:
             USER_DATA_NOT_FOUND = '⚠️ No data found for user_id: {0}'
             SEPARATOR = '⋇⋆✦⋆⋇' * 6
 
+
+RECOMMENDATION_NUMBER_TO_NAME = {
+    1: 'no_join',
+    2: 'risk_join',
+    3: 'maybe_join',
+    4: 'join',
+    5: 'must_join'
+}
